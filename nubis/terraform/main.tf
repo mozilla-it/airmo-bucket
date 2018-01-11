@@ -51,6 +51,14 @@ resource "aws_iam_group_policy" "bucket-policy" {
     {
       "Effect": "Allow",
       "Action": [
+        "s3:ListBuckets",
+        "s3:ListAllMyBuckets"
+      ],
+      "Resource": "arn:aws:s3:::*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
         "s3:*"
       ],
       "Resource": [
