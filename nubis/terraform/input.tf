@@ -10,6 +10,10 @@ variable "bucket_name" {
   default = "airmo"
 }
 
+variable "remote_airmo_bucket" {
+  default = "air-mozilla-uploads-prod"
+}
+
 variable "service_name" {
 }
 

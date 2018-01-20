@@ -65,6 +65,17 @@ resource "aws_iam_group_policy" "bucket-policy" {
         "${aws_s3_bucket.airmo-bucket.arn}",
         "${aws_s3_bucket.airmo-bucket.arn}/*"
       ]
+    },
+    {
+      "Effect": "Allow",
+        "Action": [
+          "s3:ListBucket",
+          "s3:GetObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::${var.remote_airmo_bucket}",
+        "arn:aws:s3:::${var.remote_airmo_bucket}/*"
+      ]
     }
   ]
 }
