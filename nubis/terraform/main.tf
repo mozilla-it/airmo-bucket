@@ -73,8 +73,8 @@ resource "aws_iam_group_policy" "bucket-policy" {
           "s3:GetObject"
       ],
       "Resource": [
-        "arn:aws:s3:::air-mozilla-uploads-prod",
-        "arn:aws:s3:::air-mozilla-uploads-prod/*"
+        "arn:aws:s3:::${var.remote_airmo_bucket}",
+        "arn:aws:s3:::${var.remote_airmo_bucket}/*"
       ]
     }
   ]
