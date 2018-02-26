@@ -138,12 +138,13 @@ resource "aws_iam_group_policy" "vendor-access" {
       "Effect": "Allow",
       "Action": [
         "s3:ListMyBuckets",
-        "s3:ListAllMyBuckets",
+        "s3:ListAllMyBuckets"
       ],
       "Resource": "arn:aws:s3:::*"
     },
     {
       "Sid": "AllowS3UserToListRootFolder",
+      "Effect": "Allow",
       "Action": [
         "s3:ListBucket"
       ],
@@ -162,7 +163,6 @@ resource "aws_iam_group_policy" "vendor-access" {
       ]
     }
   ]
-
 }
 EOF
 }
