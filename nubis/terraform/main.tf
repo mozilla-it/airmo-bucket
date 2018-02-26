@@ -17,6 +17,14 @@ resource "aws_s3_bucket" "airmo-bucket" {
   bucket  = "${var.bucket_name}-${random_id.rand-var.hex}"
   acl     = "private"
 
+  # only has support for 1 rule atm
+  cors_rule {
+    allowed_headers = [ "*" ]
+    allowed_methods = [ "GET", "PUT", "POST" ]
+    allowed_origins = [ "${var.cors_allowed_origins}" ]
+    max_age_seconds = "${var.cors_max_age_seconds}"
+  }
+
   tags {
     Name              = "${var.bucket_name}-${random_id.rand-var.hex}"
     ServiceName       = "${var.service_name}"
