@@ -15,7 +15,7 @@ resource "random_id" "rand-var" {
 resource "aws_s3_bucket" "airmo-bucket" {
 
   bucket  = "${var.bucket_name}-${random_id.rand-var.hex}"
-  acl     = "private"
+  acl     = "${var.bucket_acl}"
 
   # only has support for 1 rule atm
   cors_rule {
