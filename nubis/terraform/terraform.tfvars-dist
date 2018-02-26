@@ -1,5 +1,6 @@
-account       = "you-account-name"
-region        = "us-west-2"
-service_name  = "your-service-name"
-arena         = "core"
-bucket_users  = [ "user1" ]
+account                 = "you-account-name"
+region                  = "us-west-2"
+service_name            = "your-service-name"
+arena                   = "core"
+bucket_users            = [ "user1" ]
+cors_allowed_origins    = [ "https://example.com" ]
