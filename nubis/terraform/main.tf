@@ -143,22 +143,13 @@ resource "aws_iam_group_policy" "vendor-access" {
       "Resource": "arn:aws:s3:::*"
     },
     {
-      "Sid": "AllowS3UserToListRootFolder",
-      "Effect": "Allow",
-      "Action": [
-        "s3:ListBucket"
-      ],
-      "Resource": [
-        "${aws_s3_bucket.airmo-bucket.arn}"
-      ]
-    },
-    {
       "Sid": "AllowS3UserToListSubFolder",
       "Effect": "Allow",
       "Action": [
         "s3:*"
       ],
       "Resource": [
+        "${aws_s3_bucket.airmo-bucket.arn}/${var.magic_folder}",
         "${aws_s3_bucket.airmo-bucket.arn}/${var.magic_folder}/*"
       ]
     }
