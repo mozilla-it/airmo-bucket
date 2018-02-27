@@ -36,3 +36,12 @@ variable "cors_allowed_origins" {
 variable "cors_max_age_seconds" {
   default = "3000"
 }
+
+variable "vendor_users" {
+  type  = "list"
+}
+
+variable "magic_folder" {
+  default = "encoding-com"
+}
+
