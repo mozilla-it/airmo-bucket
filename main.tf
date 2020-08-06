@@ -24,9 +24,9 @@ resource "aws_s3_bucket" "airmo-bucket" {
   }
 
   tags = {
-    Name             = "${var.bucket_name}-${random_id.rand-var.hex}"
-    ServiceName      = var.service_name
-    TechnicalContact = var.technical_contact
+    Name      = "${var.bucket_name}-${random_id.rand-var.hex}"
+    Region    = var.region
+    Terraform = "true"
   }
 }
 
