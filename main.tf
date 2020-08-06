@@ -33,6 +33,11 @@ resource "aws_s3_bucket" "airmo-bucket" {
 resource "aws_iam_user" "bucket-users" {
   count = length(var.bucket_users)
   name  = element(var.bucket_users, count.index)
+
+  tags = {
+    Name      = element(var.bucket_users, count.index)
+    Terraform = "true"
+  }
 }
 
 resource "aws_iam_access_key" "bucket-user-keys" {
