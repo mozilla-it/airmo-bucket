@@ -26,11 +26,11 @@ variable "technical_contact" {
 }
 
 variable "bucket_users" {
-  type  = "list"
+  type = list(string)
 }
 
 variable "cors_allowed_origins" {
-  type  = "list"
+  type = list(string)
 }
 
 variable "cors_max_age_seconds" {
@@ -38,7 +38,7 @@ variable "cors_max_age_seconds" {
 }
 
 variable "vendor_users" {
-  type  = "list"
+  type = list(string)
 }
 
 variable "magic_folder" {
