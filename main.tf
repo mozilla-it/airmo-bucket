@@ -3,6 +3,10 @@ provider "aws" {
   region  = var.region
 }
 
+locals {
+  bucket_name = "${var.bucket_name}-${random_id.rand-var.hex}"
+}
+
 resource "random_id" "rand-var" {
   keepers = {
     bucket_name = var.bucket_name
@@ -11,9 +15,85 @@ resource "random_id" "rand-var" {
   byte_length = 8
 }
 
+# Policy given by Andy
+data "aws_iam_policy_document" "airmo-bucket" {
+
+  statement {
+    effect = "Allow"
+    principals {
+      type = "AWS"
+      identifiers = [
+        "arn:aws:iam::831879419742:user/content-conversions-executor"
+      ]
+    }
+    actions = [
+      "s3:GetBucketLocation",
+      "s3:ListBucket"
+    ]
+    resources = [
+      "arn:aws:s3:::${local.bucket_name}"
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+    principals {
+      type = "AWS"
+      identifiers = [
+        "arn:aws:iam::831879419742:user/content-conversions-executor"
+      ]
+    }
+    actions = [
+      "s3:Get*",
+      "s3:List*"
+    ]
+    resources = [
+      "arn:aws:s3:::${local.bucket_name}",
+      "arn:aws:s3:::${local.bucket_name}/*"
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+    principals {
+      type = "AWS"
+      identifiers = [
+        "arn:aws:iam::831879419742:role/beta-migration-awsBatchSpotInstanceRole"
+      ]
+    }
+    actions = [
+      "s3:GetBucketLocation",
+      "s3:ListBucket"
+    ]
+    resources = [
+      "arn:aws:s3:::${local.bucket_name}"
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+    principals {
+      type = "AWS"
+      identifiers = [
+        "arn:aws:iam::831879419742:role/beta-migration-awsBatchSpotInstanceRole"
+      ]
+    }
+    actions = [
+      "s3:Get*",
+      "s3:List*"
+    ]
+    resources = [
+      "arn:aws:s3:::${local.bucket_name}",
+      "arn:aws:s3:::${local.bucket_name}/*"
+    ]
+  }
+
+}
+
 resource "aws_s3_bucket" "airmo-bucket" {
   bucket = "${var.bucket_name}-${random_id.rand-var.hex}"
   acl    = var.bucket_acl
+  policy = data.aws_iam_policy_document.airmo-bucket.json
 
   # only has support for 1 rule atm
   cors_rule {
@@ -50,53 +130,51 @@ resource "aws_iam_group" "airmo-bucket-group" {
   path = "/nubis/"
 }
 
-resource "aws_iam_group_policy" "bucket-policy" {
-  name  = "airmo-s3-bucket-access"
-  group = aws_iam_group.airmo-bucket-group.id
+data "aws_iam_policy_document" "bucket-policy" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:ListBuckets",
+      "s3:ListAllMyBuckets"
+    ]
+    resources = [
+      "arn:aws:s3:::*"
+    ]
+  }
 
-  policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-        "s3:ListBuckets",
-        "s3:ListAllMyBuckets"
-      ],
-      "Resource": "arn:aws:s3:::*"
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "s3:*"
-      ],
-      "Resource": [
-        "${aws_s3_bucket.airmo-bucket.arn}",
-        "${aws_s3_bucket.airmo-bucket.arn}/*"
-      ]
-    },
-    {
-      "Effect": "Allow",
-        "Action": [
-          "s3:ListBucket",
-          "s3:GetObject"
-      ],
-      "Resource": [
-        "arn:aws:s3:::${var.remote_airmo_bucket}",
-        "arn:aws:s3:::${var.remote_airmo_bucket}/*"
-      ]
-    }
-  ]
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:*"
+    ]
+    resources = [
+      "${aws_s3_bucket.airmo-bucket.arn}",
+      "${aws_s3_bucket.airmo-bucket.arn}/*"
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:ListBucket",
+      "s3:GetObject"
+    ]
+    resources = [
+      "arn:aws:s3:::${var.remote_airmo_bucket}",
+      "arn:aws:s3:::${var.remote_airmo_bucket}/*"
+    ]
+  }
 }
-EOF
 
+resource "aws_iam_group_policy" "bucket-policy" {
+  name   = "airmo-s3-bucket-access"
+  group  = aws_iam_group.airmo-bucket-group.id
+  policy = data.aws_iam_policy_document.bucket-policy.json
 }
 
 resource "aws_iam_group_membership" "bucket-group-members" {
   name  = "bucket-group-members"
   users = aws_iam_user.bucket-users.*.name
-
   group = aws_iam_group.airmo-bucket-group.name
 }
 
@@ -120,40 +198,40 @@ resource "aws_iam_group" "vendor-group" {
 resource "aws_iam_group_membership" "vendor-group-members" {
   name  = "vendor-group-members"
   users = aws_iam_user.vendor-users.*.name
-
   group = aws_iam_group.vendor-group.name
 }
 
-resource "aws_iam_group_policy" "vendor-access" {
-  name  = "airmo-s3-vendor-access"
-  group = aws_iam_group.vendor-group.id
+data "aws_iam_policy_document" "vendor-access" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:ListMyBuckets",
+      "s3:ListAllMyBuckets"
+    ]
 
-  policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-        "s3:ListMyBuckets",
-        "s3:ListAllMyBuckets"
-      ],
-      "Resource": "arn:aws:s3:::*"
-    },
-    {
-      "Sid": "AllowS3UserToListSubFolder",
-      "Effect": "Allow",
-      "Action": [
-        "s3:*"
-      ],
-      "Resource": [
-        "${aws_s3_bucket.airmo-bucket.arn}/${var.magic_folder}",
-        "${aws_s3_bucket.airmo-bucket.arn}/${var.magic_folder}/*"
-      ]
-    }
-  ]
+    resources = [
+      "arn:aws:s3:::*"
+    ]
+  }
+
+  statement {
+    sid    = "AllowS3UserToListSubFolder"
+    effect = "Allow"
+    actions = [
+      "s3:*"
+    ]
+
+    resources = [
+      "${aws_s3_bucket.airmo-bucket.arn}/${var.magic_folder}",
+      "${aws_s3_bucket.airmo-bucket.arn}/${var.magic_folder}/*"
+    ]
+  }
 }
-EOF
+
+resource "aws_iam_group_policy" "vendor-access" {
+  name   = "airmo-s3-vendor-access"
+  group  = aws_iam_group.vendor-group.id
+  policy = data.aws_iam_policy_document.vendor-access.json
 
 }
 
